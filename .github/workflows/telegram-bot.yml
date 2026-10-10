@@ -29,5 +29,6 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_OWNER_ID: ${{ secrets.TELEGRAM_OWNER_ID }}
+          SUPERTEAM_CLAIM_CODE: ${{ secrets.SUPERTEAM_CLAIM_CODE }}
           GITHUB_TOKEN: ${{ github.token }}
         run: python -m telegram.bot
