@@ -102,7 +102,7 @@ def opportunities_text(gh_token: str):
         return "GitHub non raggiungibile al momento. Riprova piu' tardi."
 
 
-def reply_for(message: dict, owner_id: str, gh_token: str):
+def reply_for(message: dict, owner_id: str, gh_token: str, claim_code: str = ""):
     """Return a text reply or None. Only private chats can issue commands."""
     chat = message.get("chat") or {}
     sender = message.get("from") or {}
@@ -126,6 +126,17 @@ def reply_for(message: dict, owner_id: str, gh_token: str):
                 "\nNon inviare mai il token del bot.")
     if not owner_id or str(sender_id) != owner_id:
         return "🔒 Comando riservato. Scrivi /id per conoscere il tuo User ID."
+    if name == "/claim":
+        # Only the previously authenticated Telegram owner sees the code.
+        # Telegram bot private chats are NOT end-to-end encrypted.
+        if not claim_code:
+            return "Link Superteam non ancora configurato. Controlla il secret SUPERTEAM_CLAIM_CODE."
+        if not re.fullmatch(r"[A-Za-z0-9_-]{6,128}", claim_code):
+            return "Formato codice claim non valido. Nessun codice inviato."
+        return ("Link personale per collegare l'agente Superteam:\n"
+                "https://superteam.fun/earn/claim/" + claim_code
+                + "\nAttenzione: e' un link riservato, non inoltrarlo."
+                "\nAprilo nel browser dopo aver effettuato l'accesso al tuo profilo Talent.")
     if name in ("/help", "/aiuto"):
         return ("🤖 Comandi disponibili:\n"
                 "/id - mostra il tuo User ID\n"
@@ -140,7 +151,7 @@ def reply_for(message: dict, owner_id: str, gh_token: str):
     return "Comando non riconosciuto. Scrivi /help."
 
 
-def process_once(token: str, owner_id: str, gh_token: str) -> int:
+def process_once(token: str, owner_id: str, gh_token: str, claim_code: str = "") -> int:
     updates = telegram(token, "getUpdates", {
         "timeout": 0, "limit": MAX_UPDATES,
         "allowed_updates": ["message"],
@@ -154,7 +165,7 @@ def process_once(token: str, owner_id: str, gh_token: str) -> int:
             continue
         message = row.get("message")
         if isinstance(message, dict):
-            answer = reply_for(message, owner_id, gh_token)
+            answer = reply_for(message, owner_id, gh_token, claim_code)
             if answer:
                 telegram(token, "sendMessage", {
                     "chat_id": message["chat"]["id"],
@@ -177,6 +188,7 @@ def main():
     token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
     owner_id = os.environ.get("TELEGRAM_OWNER_ID", "").strip()
     gh_token = os.environ.get("GITHUB_TOKEN", "").strip()
+    claim_code = os.environ.get("SUPERTEAM_CLAIM_CODE", "").strip()
     repo = os.environ.get("GITHUB_REPOSITORY", "")
     if repo != REPO:
         print("Wrong repository for this bot.")
@@ -188,8 +200,10 @@ def main():
         print("TELEGRAM_OWNER_ID must be a numeric Telegram user ID.")
         return 2
     print("::add-mask::" + token)
+    if claim_code:
+        print("::add-mask::" + claim_code)
     try:
-        n = process_once(token, owner_id, gh_token)
+        n = process_once(token, owner_id, gh_token, claim_code)
     except RemoteError as error:
         print("Telegram bot polling failed: " + str(error))
         return 1
