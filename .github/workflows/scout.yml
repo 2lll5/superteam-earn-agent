@@ -2,6 +2,9 @@ name: Superteam agent-eligible opportunity scout
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/scout.yml'
   schedule:
     # Offset from :00 to reduce GitHub scheduled-run congestion.
     - cron: '17 */4 * * *'
