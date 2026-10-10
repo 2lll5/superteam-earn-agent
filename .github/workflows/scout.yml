@@ -30,4 +30,4 @@ jobs:
         env:
           SUPERTEAM_API_KEY: ${{ secrets.SUPERTEAM_API_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
-        run: python -m scout --create-issues
+        run: python -m scout --create-issues --min-score 0
