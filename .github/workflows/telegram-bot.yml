@@ -1,0 +1,33 @@
+name: Telegram AKE owner commands
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/telegram-bot.yml'
+  schedule:
+    - cron: '7,17,27,37,47,57 * * * *'
+
+permissions:
+  contents: read
+  actions: read
+  issues: read
+
+concurrency:
+  group: telegram-owner-bot
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Poll private owner commands
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_OWNER_ID: ${{ secrets.TELEGRAM_OWNER_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python -m telegram.bot
