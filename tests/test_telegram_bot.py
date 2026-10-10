@@ -24,5 +24,14 @@ class TelegramBotTests(unittest.TestCase):
     def test_ignore_other_bots_named_commands(self):
         self.assertIsNone(reply_for(m(txt="/id@DifferentBot"), OWNER, ""))
 
+
+    def test_claim_requires_authenticated_owner(self):
+        code="ABCDE12345"
+        self.assertIn("riservato", reply_for(m(123456788, txt="/claim"), OWNER, "", code).lower())
+        self.assertNotIn(code, reply_for(m(123456788, txt="/claim"), OWNER, "", code))
+        self.assertIn("https://superteam.fun/earn/claim/"+code,
+                      reply_for(m(txt="/claim"), OWNER, "", code))
+        self.assertNotIn(code, reply_for(m(txt="/claim"), "", "", code))
+
 if __name__ == "__main__":
     unittest.main()
