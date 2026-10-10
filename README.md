@@ -25,6 +25,7 @@ with GitHub Actions; no laptop or private keys required for scheduled scans.
 
 ### 3. SolProof (working prototype)
 - [Documentation and CLI examples](SOLPROOF.md)
+- [Small fixed-scope pilot offer and project contact](SERVICES.md)
 - `python -m solproof --signature SIGNATURE --recipient PUBLIC_ADDRESS`
 - Checks `finalized` Solana SOL and checked SPL transfers via JSON-RPC.
 - Requires an explicit parsed transfer AND positive net recipient balance.
